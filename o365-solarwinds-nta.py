@@ -2,6 +2,7 @@ import json
 import urllib.request
 import uuid
 import os
+import json2xml
 
 
 #Original starting code from Microsoft article:
@@ -46,6 +47,7 @@ if version['latest'] > latestVersion:
             udpPorts = endpointSet['udpPorts'] if 'udpPorts' in endpointSet else ''
             flatUrls.extend([(category, url, tcpPorts, udpPorts) for url in urls])
     flatIps = []
+    print endpointSets
     for endpointSet in endpointSets:
         if endpointSet['category'] in ('Optimize', 'Allow'):
             ips = endpointSet['ips'] if 'ips' in endpointSet else []
@@ -54,7 +56,7 @@ if version['latest'] > latestVersion:
             ip4s = [ip for ip in ips if '.' in ip]
             tcpPorts = endpointSet['tcpPorts'] if 'tcpPorts' in endpointSet else ''
             udpPorts = endpointSet['udpPorts'] if 'udpPorts' in endpointSet else ''
-            flatIps.extend([(category, ip, tcpPorts, udpPorts) for ip in ip4s])
+            #flatIps.extend([(category, ip, tcpPorts, udpPorts) for ip in ip4s])
     print('IPv4 Firewall IP Address Ranges')
     print(','.join(sorted(set([ip for (category, ip, tcpPorts, udpPorts) in flatIps]))))
     print('URLs for Proxy Server')
