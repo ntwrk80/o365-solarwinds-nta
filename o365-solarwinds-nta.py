@@ -47,7 +47,7 @@ if version['latest'] > latestVersion:
             udpPorts = endpointSet['udpPorts'] if 'udpPorts' in endpointSet else ''
             flatUrls.extend([(category, url, tcpPorts, udpPorts) for url in urls])
     flatIps = []
-    print(json2xml.json2xml(endpointSets).to_xml())
+    print(json2xml.Json2xml(endpointSets).to_xml())
     for endpointSet in endpointSets:
         if endpointSet['category'] in ('Optimize', 'Allow'):
             ips = endpointSet['ips'] if 'ips' in endpointSet else []
