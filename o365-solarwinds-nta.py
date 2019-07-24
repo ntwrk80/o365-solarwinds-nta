@@ -62,6 +62,7 @@ if version['latest'] > latestVersion:
     print('IPv4 Firewall IP Address Ranges')
     print (flatIps)
     for ip in flatIps:
+        serviceArea = ip [0]
         ipNet = ipaddress.ip_network(ip[2])
         ipStart = ipNet[0]
         ipEnd = ipNet[-1]
