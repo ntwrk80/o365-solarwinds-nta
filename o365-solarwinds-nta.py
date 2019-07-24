@@ -52,6 +52,7 @@ if version['latest'] > latestVersion:
         if endpointSet['category'] in ('Optimize', 'Allow'):
             ips = endpointSet['ips'] if 'ips' in endpointSet else []
             category = endpointSet['category']
+            serviceArea = endpointSet['serviceArea']
             # IPv4 strings have dots while IPv6 strings have colons
             ip4s = [ip for ip in ips if '.' in ip]
             tcpPorts = endpointSet['tcpPorts'] if 'tcpPorts' in endpointSet else ''
@@ -63,7 +64,7 @@ if version['latest'] > latestVersion:
         ipNet = ipaddress.ip_network(ip[1])
         ipStart = ipNet[0]
         ipEnd = ipNet[-1]
-        print (f"<Range from=\"{ipStart}\" to=\"{ipEnd}\"/>")
+        print (f"<Range from=\"{ipStart}\" to=\"{ipEnd}\"/> {serviceArea}")
 
     print('\n'.join(sorted(set([ip for (category, ip, tcpPorts, udpPorts) in flatIps]))))
     #print('URLs for Proxy Server')
