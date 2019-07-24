@@ -2,7 +2,6 @@ import json
 import urllib.request
 import uuid
 import os
-import ipaddress
 import json2xml
 
 
@@ -11,6 +10,7 @@ import json2xml
 #
 
 # helper to call the webservice and parse the response
+
 def webApiGet(methodName, instanceName, clientRequestId):
     ws = "https://endpoints.office.com"
     requestPath = ws + '/' + methodName + '/' + instanceName + '?clientRequestId=' + clientRequestId
@@ -47,7 +47,7 @@ if version['latest'] > latestVersion:
             udpPorts = endpointSet['udpPorts'] if 'udpPorts' in endpointSet else ''
             flatUrls.extend([(category, url, tcpPorts, udpPorts) for url in urls])
     flatIps = []
-
+    print(Json2xml(endpointSets).to_xml())
     for endpointSet in endpointSets:
         if endpointSet['category'] in ('Optimize', 'Allow'):
             ips = endpointSet['ips'] if 'ips' in endpointSet else []
@@ -56,18 +56,11 @@ if version['latest'] > latestVersion:
             ip4s = [ip for ip in ips if '.' in ip]
             tcpPorts = endpointSet['tcpPorts'] if 'tcpPorts' in endpointSet else ''
             udpPorts = endpointSet['udpPorts'] if 'udpPorts' in endpointSet else ''
-            flatIps.extend([(category, ip, tcpPorts, udpPorts) for ip in ip4s])
+            #flatIps.extend([(category, ip, tcpPorts, udpPorts) for ip in ip4s])
     print('IPv4 Firewall IP Address Ranges')
-    print (flatIps)
-    for ip in flatIps:
-        ipNet = ipaddress.ip_network(ip[1])
-        ipStart = ipNet[0]
-        ipEnd = ipNet[-1]
-        print (f"<Range from=\"{ipStart}\" to=\"{ipEnd}\"/>")
-
-    print('\n'.join(sorted(set([ip for (category, ip, tcpPorts, udpPorts) in flatIps]))))
-    #print('URLs for Proxy Server')
-    #print(','.join(sorted(set([url for (category, url, tcpPorts, udpPorts) in flatUrls]))))
+    print(','.join(sorted(set([ip for (category, ip, tcpPorts, udpPorts) in flatIps]))))
+    print('URLs for Proxy Server')
+    print(','.join(sorted(set([url for (category, url, tcpPorts, udpPorts) in flatUrls]))))
 
     # TODO send mail (e.g. with smtplib/email modules) with new endpoints data
 else:
