@@ -63,12 +63,17 @@ if version['latest'] > latestVersion:
     print (flatIps)
     for ip in flatIps:
         serviceArea = ip [0]
+        currentServiceArea = ""
+        if serviceArea != currentServiceArea:
+            currentServiceArea = serviceArea
+            print ("<AddressGroups xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/IPAddressGroupsSchema.xsd\">")
+            print (f"     <AddressGroup enabled=\"true\" description=\"Office 365 {serviceArea}\">")
         ipNet = ipaddress.ip_network(ip[2])
         ipStart = ipNet[0]
         ipEnd = ipNet[-1]
-        print (f"<Range from=\"{ipStart}\" to=\"{ipEnd}\"/> {serviceArea}")
+        print (f"<Range from=\"{ipStart}\" to=\"{ipEnd}\"/>")
 
-    print('\n'.join(sorted(set([ip for (category, ip, tcpPorts, udpPorts) in flatIps]))))
+    #print('\n'.join(sorted(set([ip for (category, ip, tcpPorts, udpPorts) in flatIps]))))
     #print('URLs for Proxy Server')
     #print(','.join(sorted(set([url for (category, url, tcpPorts, udpPorts) in flatUrls]))))
 
