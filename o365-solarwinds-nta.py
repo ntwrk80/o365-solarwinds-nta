@@ -17,6 +17,46 @@ def webApiGet(methodName, instanceName, clientRequestId):
     request = urllib.request.Request(requestPath)
     with urllib.request.urlopen(request) as response:
         return json.loads(response.read().decode())
+
+def printXML(endpointSets):
+    for endpointSet in endpointSets:
+        if endpointSet['category'] in ('Optimize', 'Allow'):
+            ips = endpointSet['ips'] if 'ips' in endpointSet else []
+            category = endpointSet['category']
+            serviceArea = endpointSet['serviceArea']
+            # IPv4 strings have dots while IPv6 strings have colons
+            ip4s = [ip for ip in ips if '.' in ip]
+            tcpPorts = endpointSet['tcpPorts'] if 'tcpPorts' in endpointSet else ''
+            udpPorts = endpointSet['udpPorts'] if 'udpPorts' in endpointSet else ''
+            flatIps.extend([(serviceArea, category, ip, tcpPorts, udpPorts) for ip in ip4s])
+    print('IPv4 Firewall IP Address Ranges')
+    #print (flatIps)
+    currentServiceArea = " "
+
+
+    print ("<AddressGroups xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/IPAddressGroupsSchema.xsd\">")
+    for ip in flatIps:
+        serviceArea = ip [0]
+        if serviceArea != currentServiceArea:
+            if currentServiceArea != " ":
+                print ("     </AddressGroup>")
+            currentServiceArea = serviceArea
+            print (f"     <AddressGroup enabled=\"true\" description=\"Office 365 {serviceArea}\">")
+        ipNet = ipaddress.ip_network(ip[2])
+        ipStart = ipNet[0]
+        ipEnd = ipNet[-1]
+        print (f"          <Range from=\"{ipStart}\" to=\"{ipEnd}\"/>")
+    print ("     </AddressGroup>")
+    print ("</AddressGroups>")
+    #print('\n'.join(sorted(set([ip for (category, ip, tcpPorts, udpPorts) in flatIps]))))
+    #print('URLs for Proxy Server')
+    #print(','.join(sorted(set([url for (category, url, tcpPorts, udpPorts) in flatUrls]))))
+
+    # TODO send mail (e.g. with smtplib/email modules) with new endpoints data
+
+
+
+
 # path where client ID and latest version number will be stored
 datapath = 'endpoints_clientid_latestversion.txt'
 # fetch client ID and version if data exists; otherwise create new file
@@ -47,36 +87,6 @@ if version['latest'] > latestVersion:
             udpPorts = endpointSet['udpPorts'] if 'udpPorts' in endpointSet else ''
             flatUrls.extend([(category, url, tcpPorts, udpPorts) for url in urls])
     flatIps = []
-
-
-    for endpointSet in endpointSets:
-        if endpointSet['category'] in ('Optimize', 'Allow'):
-            ips = endpointSet['ips'] if 'ips' in endpointSet else []
-            category = endpointSet['category']
-            serviceArea = endpointSet['serviceArea']
-            # IPv4 strings have dots while IPv6 strings have colons
-            ip4s = [ip for ip in ips if '.' in ip]
-            tcpPorts = endpointSet['tcpPorts'] if 'tcpPorts' in endpointSet else ''
-            udpPorts = endpointSet['udpPorts'] if 'udpPorts' in endpointSet else ''
-            flatIps.extend([(serviceArea, category, ip, tcpPorts, udpPorts) for ip in ip4s])
-    print('IPv4 Firewall IP Address Ranges')
-    print (flatIps)
-    for ip in flatIps:
-        serviceArea = ip [0]
-        currentServiceArea = ""
-        if serviceArea != currentServiceArea:
-            currentServiceArea = serviceArea
-            print ("<AddressGroups xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/IPAddressGroupsSchema.xsd\">")
-            print (f"     <AddressGroup enabled=\"true\" description=\"Office 365 {serviceArea}\">")
-        ipNet = ipaddress.ip_network(ip[2])
-        ipStart = ipNet[0]
-        ipEnd = ipNet[-1]
-        print (f"<Range from=\"{ipStart}\" to=\"{ipEnd}\"/>")
-
-    #print('\n'.join(sorted(set([ip for (category, ip, tcpPorts, udpPorts) in flatIps]))))
-    #print('URLs for Proxy Server')
-    #print(','.join(sorted(set([url for (category, url, tcpPorts, udpPorts) in flatUrls]))))
-
-    # TODO send mail (e.g. with smtplib/email modules) with new endpoints data
+    printXML(endpointSets)
 else:
     print('Office 365 worldwide commercial service instance endpoints are up-to-date')
