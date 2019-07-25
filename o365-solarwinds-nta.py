@@ -19,40 +19,42 @@ def webApiGet(methodName, instanceName, clientRequestId):
         return json.loads(response.read().decode())
 
 def printXML(endpointSets):
-    for endpointSet in endpointSets:
-        if endpointSet['category'] in ('Optimize', 'Allow'):
-            ips = endpointSet['ips'] if 'ips' in endpointSet else []
-            category = endpointSet['category']
-            serviceArea = endpointSet['serviceArea']
-            # IPv4 strings have dots while IPv6 strings have colons
-            ip4s = [ip for ip in ips if '.' in ip]
-            tcpPorts = endpointSet['tcpPorts'] if 'tcpPorts' in endpointSet else ''
-            udpPorts = endpointSet['udpPorts'] if 'udpPorts' in endpointSet else ''
-            flatIps.extend([(serviceArea, category, ip, tcpPorts, udpPorts) for ip in ip4s])
-    print('IPv4 Firewall IP Address Ranges')
-    #print (flatIps)
-    currentServiceArea = " "
+    with open('importO365NTA.xml', 'w') as output:
+
+        for endpointSet in endpointSets:
+            if endpointSet['category'] in ('Optimize', 'Allow'):
+                ips = endpointSet['ips'] if 'ips' in endpointSet else []
+                category = endpointSet['category']
+                serviceArea = endpointSet['serviceArea']
+                # IPv4 strings have dots while IPv6 strings have colons
+                ip4s = [ip for ip in ips if '.' in ip]
+                tcpPorts = endpointSet['tcpPorts'] if 'tcpPorts' in endpointSet else ''
+                udpPorts = endpointSet['udpPorts'] if 'udpPorts' in endpointSet else ''
+                flatIps.extend([(serviceArea, category, ip, tcpPorts, udpPorts) for ip in ip4s])
+        print('IPv4 Firewall IP Address Ranges')
+        #print (flatIps)
+        currentServiceArea = " "
 
 
-    print ("<AddressGroups xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/IPAddressGroupsSchema.xsd\">")
-    for ip in flatIps:
-        serviceArea = ip [0]
-        if serviceArea != currentServiceArea:
-            if currentServiceArea != " ":
-                print ("     </AddressGroup>")
-            currentServiceArea = serviceArea
-            print (f"     <AddressGroup enabled=\"true\" description=\"Office 365 {serviceArea}\">")
-        ipNet = ipaddress.ip_network(ip[2])
-        ipStart = ipNet[0]
-        ipEnd = ipNet[-1]
-        print (f"          <Range from=\"{ipStart}\" to=\"{ipEnd}\"/>")
-    print ("     </AddressGroup>")
-    print ("</AddressGroups>")
-    #print('\n'.join(sorted(set([ip for (category, ip, tcpPorts, udpPorts) in flatIps]))))
-    #print('URLs for Proxy Server')
-    #print(','.join(sorted(set([url for (category, url, tcpPorts, udpPorts) in flatUrls]))))
+        output.write ("<AddressGroups xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/IPAddressGroupsSchema.xsd\">\n")
+        for ip in flatIps:
+            serviceArea = ip [0]
+            if serviceArea != currentServiceArea:
+                if currentServiceArea != " ":
+                    output.write ("     </AddressGroup>\n")
+                currentServiceArea = serviceArea
+                output.write (f"     <AddressGroup enabled=\"true\" description=\"Office 365 {serviceArea}\">\n")
+            ipNet = ipaddress.ip_network(ip[2])
+            ipStart = ipNet[0]
+            ipEnd = ipNet[-1]
+            output.write (f"          <Range from=\"{ipStart}\" to=\"{ipEnd}\"/>\n")
+        output.write ("     </AddressGroup>\n")
+        output.write ("</AddressGroups>\n")
+        #print('\n'.join(sorted(set([ip for (category, ip, tcpPorts, udpPorts) in flatIps]))))
+        #print('URLs for Proxy Server')
+        #print(','.join(sorted(set([url for (category, url, tcpPorts, udpPorts) in flatUrls]))))
 
-    # TODO send mail (e.g. with smtplib/email modules) with new endpoints data
+        # TODO send mail (e.g. with smtplib/email modules) with new endpoints data
 
 
 
