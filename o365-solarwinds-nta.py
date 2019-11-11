@@ -3,7 +3,7 @@ import urllib.request
 import uuid
 import os
 import ipaddress
-import json2xml
+import argparse
 
 
 #Original starting code from Microsoft article:
@@ -34,19 +34,25 @@ def printXML(endpointSets):
         print('IPv4 Firewall IP Address Ranges')
         #print (flatIps)
         currentServiceArea = " "
+        groupList = []
         output.write ("<AddressGroups xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/IPAddressGroupsSchema.xsd\">\n")
         for ip in flatIps:
             serviceArea = ip [0]
             if serviceArea != currentServiceArea:
                 if currentServiceArea != " ":
                     output.write ("     </AddressGroup>\n")
+                groupList = []
+                uniqueIps = []
                 currentServiceArea = serviceArea
                 output.write (f"     <AddressGroup enabled=\"true\" description=\"Office 365 {serviceArea}\">\n")
-            ipNet = ipaddress.ip_network(ip[2])
-            ipStart = ipNet[0]
-            ipEnd = ipNet[-1]
-            output.write (f"          <Range from=\"{ipStart}\" to=\"{ipEnd}\"/>\n")
-        output.write ("     </AddressGroup>\n")
+            if ip[2] not in uniqueIps:
+                #uniqueIPs is used because the same IP can be listed multiple times with different ports.
+                uniqueIps.append(ip[2])
+                ipNet = ipaddress.ip_network(ip[2])
+                ipStart = ipNet[0]
+                ipEnd = ipNet[-1]
+                output.write (f"          <Range from=\"{ipStart}\" to=\"{ipEnd}\"/>\n")
+            output.write ("     </AddressGroup>\n")
         output.write ("</AddressGroups>\n")
         #print('\n'.join(sorted(set([ip for (category, ip, tcpPorts, udpPorts) in flatIps]))))
         #print('URLs for Proxy Server')
@@ -56,7 +62,7 @@ def printXML(endpointSets):
 
 
 def main (argv):
-
+    # Parse
     # path where client ID and latest version number will be stored
     datapath = 'endpoints_clientid_latestversion.txt'
     # fetch client ID and version if data exists; otherwise create new file
