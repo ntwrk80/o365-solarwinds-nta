@@ -21,7 +21,7 @@ def webApiGet(methodName, instanceName, clientRequestId):
 
 def printXML(endpointSets):
     with open('importO365NTA.xml', 'w') as output:
-    flatIps=[]
+        flatIps=[]
         for endpointSet in endpointSets:
             if endpointSet['category'] in ('Optimize', 'Allow'):
                 ips = endpointSet['ips'] if 'ips' in endpointSet else []
