@@ -53,7 +53,7 @@ def printXML(endpointSets):
                 ipStart = ipNet[0]
                 ipEnd = ipNet[-1]
                 output.write (f"          <Range from=\"{ipStart}\" to=\"{ipEnd}\"/>\n")
-            output.write ("     </AddressGroup>\n")
+        output.write ("     </AddressGroup>\n")
         output.write ("</AddressGroups>\n")
         #print('\n'.join(sorted(set([ip for (category, ip, tcpPorts, udpPorts) in flatIps]))))
         #print('URLs for Proxy Server')
